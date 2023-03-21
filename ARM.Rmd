@@ -1,0 +1,102 @@
+---
+title: "ARM"
+author: "Anita Teladevalapalli"
+date: "2023-03-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r imprting libraries}
+library(viridis)
+library(arules)
+library(TSP)
+library(data.table)
+#library(ggplot2)
+#library(Matrix)
+library(tcltk)
+library(dplyr)
+library(devtools)
+library(purrr)
+library(tidyr)
+library(arulesViz)
+
+```
+
+## Setting Working Dir
+
+
+
+```{r}
+
+## YOUR working dir goes here...
+setwd("/Users/anitateladevalapalli/Documents/Text Mining/")
+```
+
+##Loading trasaction dataset
+```{r}
+DisasterTransaction <- read.transactions("/Users/anitateladevalapalli/Documents/Text Mining/TM_project/Data/transaction.csv",rm.duplicates = FALSE, format = "basket", sep=",",cols=1)
+inspect(DisasterTransaction)
+
+```
+##### Use apriori to get the RULES
+
+```{r}
+DisasterRules = arules::apriori(DisasterTransaction, parameter = list(support=.01, 
+                                                 confidence=.02, minlen=2))
+inspect(DisasterRules)
+```
+## Plot of which items are most frequent
+
+```{r}
+itemFrequencyPlot(DisasterTransaction, topN=20, type="absolute")
+```
+
+## Sort rules by a measure such as conf, sup, or lift
+```{r}
+
+SortedRulesDisaster <- sort(DisasterRules, by="lift", decreasing=TRUE)
+inspect(SortedRulesDisaster[1:10])
+(summary(SortedRulesDisaster))
+```
+###Plot
+```{r}
+subrulesDisaster <- head(sort(SortedRulesDisaster, by="confidence"),15)
+plot(subrulesDisaster)
+
+plot(subrulesDisaster, method="graph", engine="interactive")
+plot(subrulesDisaster, method="graph", engine="htmlwidget")
+```
+
+```{r}
+subrulesDisaster <- head(sort(SortedRulesDisaster, by="lift"),15)
+plot(subrulesDisaster)
+
+plot(subrulesDisaster, method="graph", engine="interactive")
+plot(subrulesDisaster, method="graph", engine="htmlwidget")
+```
+
+```{r}
+subrulesDisaster <- head(sort(SortedRulesDisaster, by="support"),15)
+plot(subrulesDisaster)
+
+plot(subrulesDisaster, method="graph", engine="interactive")
+plot(subrulesDisaster, method="graph", engine="htmlwidget")
+```
+```{r}
+rules_dataframe <- as(DisasterRules, 'data.frame')
+
+write.csv(rules_dataframe, "File Name.csv", row.names=FALSE)
+
+```
+
